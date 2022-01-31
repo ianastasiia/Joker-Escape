@@ -108,11 +108,13 @@ def load_image(name, colorkey=None):
         image = image.convert_alpha()
     return image
 
+
 def drawText(text, font, surface, x, y, color):
     textobject = font.render(text, 1, color)
     textrect = textobject.get_rect()
     textrect.topleft = (x, y)
     surface.blit(textobject, textrect)
+
 
 # завершение
 def terminate():
@@ -150,33 +152,74 @@ def playerHasHitBatman(player, batmans):
             return True
     return False
 
-# # в зависимости от уровня меняются характеристики
-# def PressButton():
-#     while True:
-#         pygame.display.update()
-#         for event in pygame.event.get():
-#             if event.type == MOUSEBUTTONDOWN or event.type == MOUSEBUTTONUP:
-#                 global BatmanMinSize, BatmanMaxSize, BatmanMinSpeed, BatmanMaxSpeed, AddBatman
-#                 if button1.pressed(pygame.mouse.get_pos()):
-#                     BatmanMinSize = 15
-#                     BatmanMaxSize = 80
-#                     BatmanMinSpeed = 1
-#                     BatmanMaxSpeed = 6
-#                     AddBatman = 35
-#
-#                 elif button2.pressed(pygame.mouse.get_pos()):
-#                     BatmanMinSize = 15
-#                     BatmanMaxSize = 70
-#                     BatmanMinSpeed = 1
-#                     BatmanMaxSpeed = 8
-#                     AddBatman = 20
-#                 elif button3.pressed(pygame.mouse.get_pos()):
-#                     BatmanMinSize = 20
-#                     BatmanMaxSize = 70
-#                     BatmanMinSpeed = 3
-#                     BatmanMaxSpeed = 11
-#                     AddBatman = 13
-#                 return
+
+# в зависимости от уровня меняются характеристики
+def PressButton():
+    while True:
+        pygame.display.update()
+        for event in pygame.event.get():
+            if event.type == MOUSEBUTTONDOWN or event.type == MOUSEBUTTONUP:
+                global BatmanMinSize, BatmanMaxSize, BatmanMinSpeed, BatmanMaxSpeed, AddBatman
+                if button1.pressed(pygame.mouse.get_pos()):
+                    BatmanMinSize = 15
+                    BatmanMaxSize = 80
+                    BatmanMinSpeed = 1
+                    BatmanMaxSpeed = 6
+                    AddBatman = 35
+
+                elif button2.pressed(pygame.mouse.get_pos()):
+                    BatmanMinSize = 15
+                    BatmanMaxSize = 70
+                    BatmanMinSpeed = 1
+                    BatmanMaxSpeed = 8
+                    AddBatman = 20
+                elif button3.pressed(pygame.mouse.get_pos()):
+                    BatmanMinSize = 20
+                    BatmanMaxSize = 70
+                    BatmanMinSpeed = 3
+                    BatmanMaxSpeed = 11
+                    AddBatman = 13
+                return
 
 
+# инициализация файлов
+font = pygame.font.SysFont('serif', 48)
+
+BatmanImg = pygame.image.load('data\\batman white.png')
+playerImg = pygame.image.load('data\player.png')
+backgroundImg = pygame.image.load('data\joker.jpg')
+
+level1 = pygame.image.load('data\level 1.png')
+level2 = pygame.image.load('data\level 2.png')
+level3 = pygame.image.load('data\level 3.png')
+
+player = playerImg.get_rect()
+
+pygame.mixer.music.load('data\Chlorine.mp3')
+gameOverSound = pygame.mixer.Sound('data\Joker Laugh.mp3')
+
+
+drawText('JOKER vs. BATMAN', font, screen, (width // 6), (height // 3), white_color)
+drawText('Press a key to start.', font, screen, (width // 4.5), (height // 3) + 50, white_color)
+
+pygame.display.update()
+waitForPlayerToPressKey()
+
+# Создание кнопок с выбором уровня
+screen.fill(black_color)
+button1 = Button()
+button2 = Button()
+button3 = Button()
+Level_1 = button1.create_button(screen, (0, 0, 255), 35, 450, 150, 50, 10, "Easy Level", black_color)
+Level_2 = button2.create_button(screen, (255, 0, 0), 225, 450, 150, 50, 10, "Medium Level", black_color)
+Level_3 = button3.create_button(screen, (255, 255, 0), 415, 450, 150, 50, 10, "Hard Level", black_color)
+
+screen.blit(level1, (50, 165))
+screen.blit(level2, (235, 170))
+screen.blit(level3, (410, 175))
+
+PressButton()
+
+pygame.mouse.set_visible(False)
+topScore = 0
 
