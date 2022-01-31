@@ -1,6 +1,8 @@
 import pygame
 import os
+import random
 import sys
+from pygame.locals import *
 
 # начало игры, инициаллизация переменных, создание поля
 pygame.init()
@@ -13,6 +15,7 @@ all_sprites = pygame.sprite.Group()
 backgroundcolor = (0, 0, 0)
 black_color = (0, 0, 0)
 white_color = (255, 255, 255)
+
 
 class Button:
     def create_button(self, surface, color, x, y, length, height, width, text, text_color):
@@ -57,6 +60,7 @@ class Button:
         else:
             return False
 
+
 class Joker(pygame.sprite.Sprite):
     image = pygame.image.load("data\player.png")
 
@@ -67,7 +71,9 @@ class Joker(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.rect.bottom = height
 
+
 jokerobj = Joker()
+
 
 class Batman(pygame.sprite.Sprite):
     image = pygame.image.load('data\\batman white.png')
@@ -85,6 +91,7 @@ class Batman(pygame.sprite.Sprite):
         if not pygame.sprite.collide_mask(self, jokerobj):
             self.rect = self.rect.move(0, 1)
 
+
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
     # если файл не существует, то выходим
@@ -101,3 +108,31 @@ def load_image(name, colorkey=None):
         image = image.convert_alpha()
     return image
 
+
+# завершение
+def terminate():
+    # f = open("topscores", mode="rb")
+    # l = list(map(int, [line.strip() for line in f]))
+    # l.append(topScore)
+    #
+    # ff = open('topscores', 'w')
+    # for elem in l:
+    #     ff.write(str(elem) + "\n")
+    #
+    # ff.close()
+
+    pygame.quit()
+    sys.exit()
+
+
+# завершение по кнопку escape
+def waitForPlayerToPressKey():
+    while True:
+        pygame.display.update()
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                terminate()
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    terminate()
+                return
