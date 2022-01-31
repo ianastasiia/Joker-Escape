@@ -57,6 +57,18 @@ class Button:
         else:
             return False
 
+class Joker(pygame.sprite.Sprite):
+    image = pygame.image.load("data\player.png")
+
+    def __init__(self):
+        super().__init__(all_sprites)
+        self.image = Joker.image
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.bottom = height
+
+jokerobj = Joker()
+
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
     # если файл не существует, то выходим
@@ -72,3 +84,4 @@ def load_image(name, colorkey=None):
     else:
         image = image.convert_alpha()
     return image
+
