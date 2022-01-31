@@ -15,6 +15,13 @@ all_sprites = pygame.sprite.Group()
 backgroundcolor = (0, 0, 0)
 black_color = (0, 0, 0)
 white_color = (255, 255, 255)
+BatmanMinSize = 20
+BatmanMaxSize = 50
+BatmanMinSpeed = 1
+BatmanMaxSpeed = 8
+AddBatman = 6
+PlayerMove = 5
+FPS = 30
 
 
 class Button:
@@ -118,15 +125,15 @@ def drawText(text, font, surface, x, y, color):
 
 # завершение
 def terminate():
-    # f = open("topscores", mode="rb")
-    # l = list(map(int, [line.strip() for line in f]))
-    # l.append(topScore)
-    #
-    # ff = open('topscores', 'w')
-    # for elem in l:
-    #     ff.write(str(elem) + "\n")
-    #
-    # ff.close()
+    f = open("data\\topscores", mode="rb")
+    l = list(map(int, [line.strip() for line in f]))
+    l.append(topScore)
+
+    ff = open('data\\topscores', 'w')
+    for elem in l:
+        ff.write(str(elem) + "\n")
+
+    ff.close()
 
     pygame.quit()
     sys.exit()
@@ -151,6 +158,18 @@ def playerHasHitBatman(player, batmans):
         if player.colliderect(b['rect']):
             return True
     return False
+
+    # running = True
+    # while running:
+    #     for event in pygame.event.get():
+    #         if event.type == pygame.QUIT:
+    #             running = False
+    #         if event.type == pygame.MOUSEBUTTONDOWN:
+    #             Landing(event.pos)
+    #     screen.fill(pygame.Color("Black"))
+    #     all_sprites.draw(screen)
+    #     all_sprites.update()
+    #     pygame.display.flip()
 
 
 # в зависимости от уровня меняются характеристики
@@ -198,7 +217,6 @@ player = playerImg.get_rect()
 pygame.mixer.music.load('data\Chlorine.mp3')
 gameOverSound = pygame.mixer.Sound('data\Joker Laugh.mp3')
 
-
 drawText('JOKER vs. BATMAN', font, screen, (width // 6), (height // 3), white_color)
 drawText('Press a key to start.', font, screen, (width // 4.5), (height // 3) + 50, white_color)
 
@@ -223,3 +241,139 @@ PressButton()
 pygame.mouse.set_visible(False)
 topScore = 0
 
+# главный поток игры
+while True:
+    batmans = []
+    score = 0
+    moveLeft, moveRight, moveUp, moveDown = False, False, False, False
+    reverse, slow = False, False
+    player.topleft = (width // 2, height - 50)
+    BatmanCount = 0
+    pygame.mixer.music.play(-1, 0.0)
+
+    while True:
+        score += 1
+
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                terminate()
+
+            if event.type == MOUSEMOTION:
+                player.move_ip(event.pos[0] - player.centerx, event.pos[1] - player.centery)
+
+            if event.type == KEYDOWN:
+                if event.key == ord('w') or event.key == K_UP:
+                    moveDown = False
+                    moveUp = True
+                if event.key == ord('d') or event.key == K_RIGHT:
+                    moveLeft = False
+                    moveRight = True
+                if event.key == ord('s') or event.key == K_DOWN:
+                    moveUp = False
+                    moveDown = True
+                if event.key == ord('a') or event.key == K_LEFT:
+                    moveRight = False
+                    moveLeft = True
+                if event.key == ord('x'):
+                    slow = True
+                if event.key == ord('z'):
+                    reverse = True
+            # работа с клавишами
+            if event.type == KEYUP:
+                if event.key == K_ESCAPE:
+                    terminate()
+                if event.key == ord('w') or event.key == K_UP:
+                    moveUp = False
+                if event.key == ord('d') or event.key == K_RIGHT:
+                    moveRight = False
+                if event.key == ord('s') or event.key == K_DOWN:
+                    moveDown = False
+                if event.key == ord('a') or event.key == K_LEFT:
+                    moveLeft = False
+                if event.key == ord('x'):
+                    slow = False
+                    score = 0
+                if event.key == ord('z'):
+                    reverse = False
+                    score = 0
+
+        if not reverse and not slow:
+            BatmanCount += 1
+        if BatmanCount == AddBatman:
+            BatmanCount = 0
+            BatmanSize = random.randint(BatmanMinSize, BatmanMaxSize)
+            newBatman = {
+                'speed': random.randint(BatmanMinSpeed, BatmanMaxSpeed),
+                'rect': pygame.Rect(random.randint(0, width - BatmanSize), 0 - BatmanSize, BatmanSize, BatmanSize),
+                'surface': pygame.transform.scale(BatmanImg, (BatmanSize, BatmanSize)),
+            }
+
+            batmans.append(newBatman)
+
+        if moveUp and player.top > 0:
+            player.move_ip(0, -1 * PlayerMove)
+        if moveRight and player.right < width:
+            player.move_ip(PlayerMove, 0)
+        if moveDown and player.bottom < height:
+            player.move_ip(0, PlayerMove)
+        if moveLeft and player.left > 0:
+            player.move_ip(-1 * PlayerMove, 0)
+
+        pygame.mouse.set_pos(player.centerx, player.centery)
+
+        for b in batmans:
+            if not slow and not reverse:
+                b['rect'].move_ip(0, b['speed'])
+            elif slow:
+                b['rect'].move_ip(0, 1)
+            elif reverse:
+                b['rect'].move_ip(0, -5)
+
+        for b in batmans[:]:
+            if b['rect'].top > height:
+                batmans.remove(b)
+
+        screen.fill(backgroundcolor)
+
+        drawText('Score: %s' % (score), font, screen, 10, 0, (255, 255, 255))
+        drawText('Top Score: %s' % (topScore), font, screen, 10, 40, (255, 255, 255))
+
+        screen.blit(playerImg, player)
+
+        for b in batmans:
+            screen.blit(b['surface'], b['rect'])
+
+        pygame.display.update()
+        horizontal_borders = pygame.sprite.Group()
+        vertical_borders = pygame.sprite.Group()
+        if playerHasHitBatman(player, batmans):
+            if score > topScore:
+                topScore = score
+            break
+
+        clock.tick(FPS)
+
+    # завершение игры
+    pygame.mixer.music.stop()
+    gameOverSound.play()
+
+    screen.fill(black_color)
+    screen.blit(backgroundImg, (0, 0))
+
+    f = open("data\\topscores", mode="rb")
+    l = list(map(int, [line.strip() for line in f]))
+
+    drawText('GAME OVER', font, screen, (width // 3.5), (height // 3.5), white_color)
+    drawText('Press a key to play again.', font, screen, (width // 7), (height // 3.5) + 50, white_color)
+    drawText('Last top scores', font, screen, (width // 3.5), (height // 3.5) + 130, white_color)
+    drawText(str(topScore), font, screen, (width // 2.2), (height // 3.5) + 180, white_color)
+    drawText(str(l[-1]), font, screen, (width // 2.2), (height // 3.5) + 220, white_color)
+    drawText(str(l[-2]), font, screen, (width // 2.2), (height // 3.5) + 260, white_color)
+    drawText(str(l[-3]), font, screen, (width // 2.2), (height // 3.5) + 300, white_color)
+    drawText(str(l[-4]), font, screen, (width // 2.2), (height // 3.5) + 340, white_color)
+
+    f.close()
+    pygame.display.update()
+    waitForPlayerToPressKey()
+
+    gameOverSound.stop()
