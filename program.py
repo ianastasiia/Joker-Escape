@@ -69,6 +69,22 @@ class Joker(pygame.sprite.Sprite):
 
 jokerobj = Joker()
 
+class Batman(pygame.sprite.Sprite):
+    image = pygame.image.load('data\\batman white.png')
+
+    def __init__(self, pos):
+        super().__init__(all_sprites)
+        self.image = Batman.image
+        self.rect = self.image.get_rect()
+        # вычисляем маску для эффективного сравнения
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]
+
+    def update(self):
+        if not pygame.sprite.collide_mask(self, jokerobj):
+            self.rect = self.rect.move(0, 1)
+
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
     # если файл не существует, то выходим
