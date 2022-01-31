@@ -108,6 +108,11 @@ def load_image(name, colorkey=None):
         image = image.convert_alpha()
     return image
 
+def drawText(text, font, surface, x, y, color):
+    textobject = font.render(text, 1, color)
+    textrect = textobject.get_rect()
+    textrect.topleft = (x, y)
+    surface.blit(textobject, textrect)
 
 # завершение
 def terminate():
@@ -136,3 +141,42 @@ def waitForPlayerToPressKey():
                 if event.key == K_ESCAPE:
                     terminate()
                 return
+
+
+# касание спрайтов - коллайд
+def playerHasHitBatman(player, batmans):
+    for b in batmans:
+        if player.colliderect(b['rect']):
+            return True
+    return False
+
+# # в зависимости от уровня меняются характеристики
+# def PressButton():
+#     while True:
+#         pygame.display.update()
+#         for event in pygame.event.get():
+#             if event.type == MOUSEBUTTONDOWN or event.type == MOUSEBUTTONUP:
+#                 global BatmanMinSize, BatmanMaxSize, BatmanMinSpeed, BatmanMaxSpeed, AddBatman
+#                 if button1.pressed(pygame.mouse.get_pos()):
+#                     BatmanMinSize = 15
+#                     BatmanMaxSize = 80
+#                     BatmanMinSpeed = 1
+#                     BatmanMaxSpeed = 6
+#                     AddBatman = 35
+#
+#                 elif button2.pressed(pygame.mouse.get_pos()):
+#                     BatmanMinSize = 15
+#                     BatmanMaxSize = 70
+#                     BatmanMinSpeed = 1
+#                     BatmanMaxSpeed = 8
+#                     AddBatman = 20
+#                 elif button3.pressed(pygame.mouse.get_pos()):
+#                     BatmanMinSize = 20
+#                     BatmanMaxSize = 70
+#                     BatmanMinSpeed = 3
+#                     BatmanMaxSpeed = 11
+#                     AddBatman = 13
+#                 return
+
+
+
